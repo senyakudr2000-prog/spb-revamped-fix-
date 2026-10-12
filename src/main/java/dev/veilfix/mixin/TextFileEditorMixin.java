@@ -1,16 +1,14 @@
 package dev.veilfix.mixin;
 
 import foundry.veil.api.client.imgui.CodeEditor;
+import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import sun.misc.Unsafe;
 
-/**
- * TextFileEditor создаёт CodeEditor (-> ImGui TextEditor) прямо при старте Veil, даже когда
- * ImGui выключен. Если нативки ImGui нет, не падаем, а оставляем редактор пустым.
- */
 @Mixin(targets = "foundry.veil.api.resource.editor.TextFileEditor", remap = false)
 public abstract class TextFileEditorMixin {
     private static final Logger VEILFIX_LOGGER = LoggerFactory.getLogger("veilfix");
@@ -25,7 +23,13 @@ public abstract class TextFileEditorMixin {
             return new CodeEditor(saveText);
         } catch (Throwable t) {
             VEILFIX_LOGGER.warn("ImGui natives unavailable, Veil code editor disabled: {}", t.toString());
-            return null;
+            try {
+                Field f = Unsafe.class.getDeclaredField("theUnsafe");
+                f.setAccessible(true);
+                return (CodeEditor) ((Unsafe) f.get(null)).allocateInstance(CodeEditor.class);
+            } catch (Throwable t2) {
+                throw new RuntimeException("veilfix: cannot create dummy CodeEditor", t2);
+            }
         }
     }
 }
