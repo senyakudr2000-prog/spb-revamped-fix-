@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "veilfix",
+  "version": "${version}",
+  "name": "VeilFix (ARM / Android)",
+  "description": "Lets Veil start on ARM devices (Zalith/Pojav) by disabling its ImGui debug UI when natives are missing.",
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "preLaunch": [
+      "dev.veilfix.VeilFixPreLaunch"
+    ]
+  },
+  "mixins": [
+    "veilfix.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.20.1",
+    "java": ">=17"
+  }
+}
